@@ -35,3 +35,16 @@ module "nat" {
   network_name = "default"
   depends_on   = [module.vpc]
 }
+
+resource "google_org_policy_policy" "trusted_images" {
+  name   = "projects/${var.project_name}/policies/compute.trustedImageProjects"
+  parent = "projects/${var.project_name}"
+
+  spec {
+    rules {
+      allow_all = "TRUE"
+    }
+  }
+  depends_on = [module.nat]
+}
+
