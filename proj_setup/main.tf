@@ -48,3 +48,15 @@ resource "google_org_policy_policy" "trusted_images" {
   depends_on = [module.nat]
 }
 
+resource "google_org_policy_policy" "shielded_vm" {
+  name   = "projects/${var.project_name}/policies/compute.requireShieldedVm"
+  parent = "projects/${var.project_name}"
+
+  spec {
+    rules {
+	enforce = "FALSE"
+    }
+  }
+  depends_on = [module.nat]
+}
+
