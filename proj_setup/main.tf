@@ -1,4 +1,4 @@
-#baseline config for newly created projects
+#create a new project (incl. custom network and adjusted org policices)
 
 terraform {
   required_version = ">= 1.5.2"
@@ -14,12 +14,25 @@ provider "google" {
   project = var.project_id
   region  = var.gcp_region
 }
+
+#create the project
+resource "google_project" "this_project" {
+  name                = var.project_name
+  project_id          = var.project_id
+  billing_account     = var.billing_account
+  auto_create_network = false
+  skip_delete         = false
+}
+
 #enable required APIs
 module "apis" {
   source = "./modules/apis"
   apis = ["compute.googleapis.com",
   "orgpolicy.googleapis.com"]
   project_id = var.project_id
+  #attempt to wait until the project is fully created
+  #and the billing account has been set up
+  depends_on = [google_project.this_project]
 }
 
 #create default VPC
@@ -54,7 +67,7 @@ resource "google_org_policy_policy" "shielded_vm" {
 
   spec {
     rules {
-	enforce = "FALSE"
+      enforce = "FALSE"
     }
   }
   depends_on = [module.nat]
