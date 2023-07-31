@@ -49,27 +49,11 @@ module "nat" {
   depends_on   = [module.vpc]
 }
 
-resource "google_org_policy_policy" "trusted_images" {
-  name   = "projects/${var.project_name}/policies/compute.trustedImageProjects"
-  parent = "projects/${var.project_name}"
-
-  spec {
-    rules {
-      allow_all = "TRUE"
-    }
-  }
-  depends_on = [module.nat]
+#set org policies
+module "org_policies" {
+  source                 = "./modules/org_policies"
+  enforce_trusted_images = false
+  enforce_shielded_vms   = false
+  project_name           = var.project_name
+  depends_on             = [google_project.this_project]
 }
-
-resource "google_org_policy_policy" "shielded_vm" {
-  name   = "projects/${var.project_name}/policies/compute.requireShieldedVm"
-  parent = "projects/${var.project_name}"
-
-  spec {
-    rules {
-      enforce = "FALSE"
-    }
-  }
-  depends_on = [module.nat]
-}
-
